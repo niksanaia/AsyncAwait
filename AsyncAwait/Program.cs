@@ -122,16 +122,24 @@ public static class MyThreadPool
                 {
                     if (Interlocked.Decrement(ref remaining) == 0)
                     {
-                        //TODO exception
                         t.SetResult();
                     }
                 };
                 foreach (var t1 in tasks)
                 {
+                    t1.ContinueWith(continuation);
                 }
             }
+
+            return t;
         }
 
+        public static MyTask Delay(int timeout)
+        {
+            MyTask t = new MyTask();
+            new Timer(_ => t.SetResult()).Change(timeout, -1);
+            return t;
+        }
         private void Complete(Exception? exception)
         {
             lock (this)
